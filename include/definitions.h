@@ -1,6 +1,7 @@
 #ifndef DEFINITIONS
 #define DEFINITIONS
 #define block_width 64
+#define block_height 64
 #define wall_height 48
 #define vertical_cnt 18
 #define horizonal_cnt 12
