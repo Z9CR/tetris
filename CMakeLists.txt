@@ -18,7 +18,7 @@ set(CMAKE_C_STANDARD 23) # modify it for other vers of C        #
 #set(CMAKE_CXX_STANDARD 26) # rm comment to use CPP             #
 set(RAYLIB_VERSION 6.0) # modify it for other vers of raylib    #
 set(RAYGUI_VERSION 4.0) # modify it for other vers of raygui    #
-set(PROJECT_SOURCES src/main.c) # your sources here             #
+set(PROJECT_SOURCES src/main.c include/renderer.c) # your sources here             #
 set(PROJECT_INCLUDE_DIRS include) # your extendsional libs here #
 #################################################################
 
