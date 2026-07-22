@@ -15,10 +15,10 @@
 #define tetromino_translating_delay 0.05 // delay ? secs after a translation
 #define gamew (horizonal_cnt * block_width)
 #define gameh (vertical_cnt * block_width)
-#define game_scale 0.5f
+#define game_scale 0.8f
 // divide by 2 because the original game frame is too big, 
 // the physical screen cant display all
-#define winw ((gamew + scoreboard_width) / 2)
+#define winw (game_scale * (gamew + scoreboard_width))
 #define winh (gameh * game_scale)
 #define wintitle "Tetris"
 #endif
