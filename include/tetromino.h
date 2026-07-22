@@ -27,6 +27,14 @@ typedef struct active_tetromino {
     float fall_timer;
 } active_tetromino;
 
+typedef struct locked_tetromino {
+    RenderTexture2D rt;
+    tetromino_shapes shape;
+    int rotation;
+    float pos_x;
+    float pos_y;
+} locked_tetromino;
+
 typedef struct tetromino {
     int width;
     int height;
@@ -45,5 +53,9 @@ int get_tetromino_height(tetromino_shapes shape, int rotation);
 
 /// @brief get tetromino pixel-width based on shape and rotation
 int get_tetromino_width(tetromino_shapes shape, int rotation);
+
+/// @brief get the 4 normalized grid cell positions for a shape+rotation
+/// @param out_cells[4][2] filled with (x,y) in block units, zero-origin
+void get_tetromino_cells(tetromino_shapes shape, int rotation, int out_cells[4][2]);
 
 #endif

@@ -87,3 +87,18 @@ int get_tetromino_width(tetromino_shapes shape, int rotation) {
     }
     return (max_x - min_x + 1) * block_width;
 }
+
+void get_tetromino_cells(tetromino_shapes shape, int rotation, int out_cells[4][2]) {
+    int n = GRID_SIZE[shape];
+    Cell cells[4];
+    int min_x = 999, min_y = 999;
+    for (int i = 0; i < CELL_COUNT[shape]; i++) {
+        cells[i] = transform_cell(SHAPE_CELLS[shape][i], rotation, n);
+        if (cells[i].x < min_x) min_x = cells[i].x;
+        if (cells[i].y < min_y) min_y = cells[i].y;
+    }
+    for (int i = 0; i < CELL_COUNT[shape]; i++) {
+        out_cells[i][0] = cells[i].x - min_x;
+        out_cells[i][1] = cells[i].y - min_y;
+    }
+}
