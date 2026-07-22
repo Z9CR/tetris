@@ -1,5 +1,5 @@
 #include <definitions.h>
-#include <utils.h>
+#include <tetromino.h>
 #include <renderer.h>
 
 
@@ -16,8 +16,10 @@ RenderTexture2D wall_renderer(const char* wall_img_path) {
         DrawTexture(wall, gamew - block_width, i, WHITE);
     }
     EndTextureMode();
-    UnloadTexture(wall);
-    UnloadImage(_wall);
+    #pragma region cleanup
+        UnloadTexture(wall);
+        UnloadImage(_wall);
+    #pragma endregion
     return wall_render;
 }
 
@@ -47,53 +49,10 @@ RenderTexture2D gen_next_block_texture(void)
     RenderTexture2D next_shape = LoadRenderTexture(next_prop.width, next_prop.height);
     Image _block = LoadImage(next_prop.texture_path);
     Texture2D block = LoadTextureFromImage(_block);
-    BeginTextureMode(next_shape);
-    switch (next_code) {
-        case I:
-            DrawTexture(block, 0, 0, WHITE);
-            DrawTexture(block, block_width, 0, WHITE);
-            DrawTexture(block, 2 * block_width, 0, WHITE);
-            DrawTexture(block, 3 * block_width, 0, WHITE);
-            break;
-        case J:
-            DrawTexture(block, 0, 0, WHITE);
-            DrawTexture(block, 0, block_height, WHITE);
-            DrawTexture(block, block_width, block_height, WHITE);
-            DrawTexture(block, 2 * block_width, block_height, WHITE);
-            break;
-        case L:
-            DrawTexture(block, 2 * block_width, 0, WHITE);
-            DrawTexture(block, 0, block_height, WHITE);
-            DrawTexture(block, block_width, block_height, WHITE);
-            DrawTexture(block, 2 * block_width, block_height, WHITE);
-            break;
-        case O:
-            DrawTexture(block, 0, 0, WHITE);
-            DrawTexture(block, block_width, 0, WHITE);
-            DrawTexture(block, 0, block_height, WHITE);
-            DrawTexture(block, block_width, block_height, WHITE);
-            break;
-        case S:
-            DrawTexture(block, block_width, 0, WHITE);
-            DrawTexture(block, 2 * block_width, 0, WHITE);
-            DrawTexture(block, 0, block_height, WHITE);
-            DrawTexture(block, block_width, block_height, WHITE);
-            break;
-        case T:
-            DrawTexture(block, block_width, 0, WHITE);
-            DrawTexture(block, 0, block_height, WHITE);
-            DrawTexture(block, block_width, block_height, WHITE);
-            DrawTexture(block, 2 * block_width, block_height, WHITE);
-            break;
-        case Z:
-            DrawTexture(block, 0, 0, WHITE);
-            DrawTexture(block, block_width, 0, WHITE);
-            DrawTexture(block, block_width, block_height, WHITE);
-            DrawTexture(block, 2 * block_width, block_height, WHITE);
-            break;
-    }; 
-    EndTextureMode();
+    draw_tetromino_code(next_code, &next_shape, &block);
+    #pragma region cleanup
     UnloadTexture(block);
     UnloadImage(_block);
+    #pragma endregion
     return next_shape;
 }
