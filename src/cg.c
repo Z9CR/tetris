@@ -1,5 +1,5 @@
-#include <cg.h>
 #include <raylib.h>
+#include <cg.h>
 #include <definitions.h>
 
 void show_tittle_screen_cg(const char* pic_path, const char* music_path, Font fnt) {
@@ -11,14 +11,22 @@ void show_tittle_screen_cg(const char* pic_path, const char* music_path, Font fn
         UpdateMusicStream(bgm);
         BeginDrawing();
         ClearBackground(background_color);
-        DrawTextureEx(pic, (Vector2){0, 0}, 0.0f, 0.5f, WHITE);
+        DrawTexturePro(
+            pic,
+            (Rectangle){ 0, 0, (float)pic.width, (float)pic.height },
+            (Rectangle){ 0, 0, (float)winw, (float)winh },
+            (Vector2){ 0, 0 }, 0.0f, WHITE
+        );
         DrawTextEx(
             fnt,
             "PRESS ENTER",
-            (Vector2){.x = 0, .y = 0},
+            (Vector2){
+                .x = (winw - MeasureTextEx(fnt, "PRESS ENTER", text_pt, 0.1f).x) / 2.0f,
+                .y = 0.8f * winh
+            },
             text_pt,
             0.1f,
-            WHITE
+            text_color
         );
         EndDrawing();
     }

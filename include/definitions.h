@@ -3,7 +3,7 @@
 #define block_width 64
 #define block_height 64
 #define wall_height 48
-#define scoreboard_width 440
+#define scoreboard_width 512 // fit to 10(1280):9(1152)
 #define vertical_cnt 18
 #define horizonal_cnt 12
 #define background_color (Color){0xC6, 0xCF, 0xA1, 0xFF}
