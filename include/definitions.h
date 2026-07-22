@@ -7,6 +7,8 @@
 #define vertical_cnt 18
 #define horizonal_cnt 12
 #define background_color (Color){0xC6, 0xCF, 0xA1, 0xFF}
+#define text_color (Color){0x40, 0x42, 0x43, 0xFF}
+#define text_pt 52.0f
 
 #define game_fps 60
 #define tetromino_falling_speed 1.2 // ? blocks per second

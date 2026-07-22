@@ -28,13 +28,11 @@ typedef struct active_tetromino {
     float translate_timer;
 } active_tetromino;
 
-typedef struct locked_tetromino {
-    RenderTexture2D rt;
+typedef struct locked_cell {
     tetromino_shapes shape;
-    int rotation;
-    float pos_x;
-    float pos_y;
-} locked_tetromino;
+    int grid_col;
+    int grid_row;
+} locked_cell;
 
 typedef struct tetromino {
     int width;

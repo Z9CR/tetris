@@ -5,8 +5,9 @@
 #include <definitions.h>
 #include <tetromino.h>
 
-#define MAX_LOCKED 1024
-
+#define MAX_LOCKED (vertical_cnt * horizonal_cnt)
+static unsigned int lines = 0;
+static unsigned int score = 0;
 /// Clamp pos_x so the tetromino fits between walls
 static float clamp_within_walls(float x, tetromino_shapes shape, int rotation) {
     int w = get_tetromino_width(shape, rotation);
@@ -19,17 +20,24 @@ static float clamp_within_walls(float x, tetromino_shapes shape, int rotation) {
 
 int main(void)
 {
-    // init window
     InitWindow((int)winw, (int)winh, wintitle);
     SetTargetFPS(game_fps);
-    // init audio & bgm
     InitAudioDevice();
     const Music bgm = LoadMusicStream("assets/theme.mp3");
     PlayMusicStream(bgm);
     RenderTexture2D walls_and_scoreboard = wall_and_board_renderer("assets/wall.png", "assets/score_board.png");
 
-    // locked tetromino list
-    locked_tetromino locked[MAX_LOCKED];
+    // load 7 single-block textures
+    Texture2D block_tex[7];
+    for (int i = 0; i < 7; i++) {
+        Image img = LoadImage(TextFormat("assets/blocks/%d.png", i));
+        block_tex[i] = LoadTextureFromImage(img);
+        UnloadImage(img);
+    }
+
+    // grid: 0=empty, 1=occupied
+    int grid[vertical_cnt][horizonal_cnt] = {0};
+    locked_cell locked[MAX_LOCKED];
     int locked_count = 0;
 
     // init current & preview tetromino
@@ -41,12 +49,11 @@ int main(void)
     current.rotation = 0;
     RenderTexture2D current_rt = gen_next_block_texture(&current.shape);
 
-    // preview tetromino
     tetromino_shapes next_shape;
     RenderTexture2D next_rt = gen_next_block_texture(&next_shape);
     float preview_x = (float)(gamew + 0.28f * scoreboard_width);
     float preview_y = (float)(gameh - 0.55f * scoreboard_width);
-
+    Font fnt = LoadFont("assets/font.ttf");
     while (!WindowShouldClose())
     {
         // ── INPUT ──────────────────────────────────
@@ -60,16 +67,10 @@ int main(void)
                                              current.shape, current.rotation);
             int blocked = 0;
             for (int ci = 0; ci < 4 && !blocked; ci++) {
-                float cx = new_x + cur_cells[ci][0] * (float)block_width;
-                float cy = current.pos_y + cur_cells[ci][1] * (float)block_height;
-                for (int i = 0; i < locked_count && !blocked; i++) {
-                    int lt_cells[4][2];
-                    get_tetromino_cells(locked[i].shape, locked[i].rotation, lt_cells);
-                    for (int lj = 0; lj < 4; lj++) {
-                        float lx = locked[i].pos_x + lt_cells[lj][0] * (float)block_width;
-                        float ly = locked[i].pos_y + lt_cells[lj][1] * (float)block_height;
-                        if (cx == lx && cy == ly) { blocked = 1; break; }
-                    }
+                int gx = (int)(new_x / block_width) + cur_cells[ci][0];
+                int gy = (int)(current.pos_y / block_height) + cur_cells[ci][1];
+                if (gx >= 1 && gx < horizonal_cnt - 1 && gy >= 0 && gy < vertical_cnt) {
+                    if (grid[gy][gx]) blocked = 1;
                 }
             }
             if (!blocked) { current.pos_x = new_x; current.translate_timer = 0.0f; }
@@ -80,16 +81,10 @@ int main(void)
                                              current.shape, current.rotation);
             int blocked = 0;
             for (int ci = 0; ci < 4 && !blocked; ci++) {
-                float cx = new_x + cur_cells[ci][0] * (float)block_width;
-                float cy = current.pos_y + cur_cells[ci][1] * (float)block_height;
-                for (int i = 0; i < locked_count && !blocked; i++) {
-                    int lt_cells[4][2];
-                    get_tetromino_cells(locked[i].shape, locked[i].rotation, lt_cells);
-                    for (int lj = 0; lj < 4; lj++) {
-                        float lx = locked[i].pos_x + lt_cells[lj][0] * (float)block_width;
-                        float ly = locked[i].pos_y + lt_cells[lj][1] * (float)block_height;
-                        if (cx == lx && cy == ly) { blocked = 1; break; }
-                    }
+                int gx = (int)(new_x / block_width) + cur_cells[ci][0];
+                int gy = (int)(current.pos_y / block_height) + cur_cells[ci][1];
+                if (gx >= 1 && gx < horizonal_cnt - 1 && gy >= 0 && gy < vertical_cnt) {
+                    if (grid[gy][gx]) blocked = 1;
                 }
             }
             if (!blocked) { current.pos_x = new_x; current.translate_timer = 0.0f; }
@@ -102,16 +97,10 @@ int main(void)
             get_tetromino_cells(current.shape, new_rot, cells_new);
             int blocked = 0;
             for (int ci = 0; ci < 4 && !blocked; ci++) {
-                float cx = new_x + cells_new[ci][0] * (float)block_width;
-                float cy = current.pos_y + cells_new[ci][1] * (float)block_height;
-                for (int i = 0; i < locked_count && !blocked; i++) {
-                    int lt_cells[4][2];
-                    get_tetromino_cells(locked[i].shape, locked[i].rotation, lt_cells);
-                    for (int lj = 0; lj < 4; lj++) {
-                        float lx = locked[i].pos_x + lt_cells[lj][0] * (float)block_width;
-                        float ly = locked[i].pos_y + lt_cells[lj][1] * (float)block_height;
-                        if (cx == lx && cy == ly) { blocked = 1; break; }
-                    }
+                int gx = (int)(new_x / block_width) + cells_new[ci][0];
+                int gy = (int)(current.pos_y / block_height) + cells_new[ci][1];
+                if (gx >= 1 && gx < horizonal_cnt - 1 && gy >= 0 && gy < vertical_cnt) {
+                    if (grid[gy][gx]) blocked = 1;
                 }
             }
             if (!blocked) {
@@ -129,16 +118,10 @@ int main(void)
             get_tetromino_cells(current.shape, new_rot, cells_new);
             int blocked = 0;
             for (int ci = 0; ci < 4 && !blocked; ci++) {
-                float cx = new_x + cells_new[ci][0] * (float)block_width;
-                float cy = current.pos_y + cells_new[ci][1] * (float)block_height;
-                for (int i = 0; i < locked_count && !blocked; i++) {
-                    int lt_cells[4][2];
-                    get_tetromino_cells(locked[i].shape, locked[i].rotation, lt_cells);
-                    for (int lj = 0; lj < 4; lj++) {
-                        float lx = locked[i].pos_x + lt_cells[lj][0] * (float)block_width;
-                        float ly = locked[i].pos_y + lt_cells[lj][1] * (float)block_height;
-                        if (cx == lx && cy == ly) { blocked = 1; break; }
-                    }
+                int gx = (int)(new_x / block_width) + cells_new[ci][0];
+                int gy = (int)(current.pos_y / block_height) + cells_new[ci][1];
+                if (gx >= 1 && gx < horizonal_cnt - 1 && gy >= 0 && gy < vertical_cnt) {
+                    if (grid[gy][gx]) blocked = 1;
                 }
             }
             if (!blocked) {
@@ -156,57 +139,79 @@ int main(void)
 
         if (current.fall_timer >= fall_interval) {
             float next_y = current.pos_y + (float)block_height;
-            int tetro_w = get_tetromino_width(current.shape, current.rotation);
-            int tetro_h = get_tetromino_height(current.shape, current.rotation);
+            int cur_cells_fall[4][2];
+            get_tetromino_cells(current.shape, current.rotation, cur_cells_fall);
 
             int collided = 0;
 
-            // get current tetromino cells at next_y
-            int cur_cells[4][2];
-            get_tetromino_cells(current.shape, current.rotation, cur_cells);
-
-            // check locked-tetromino collision (per-cell)
-            for (int i = 0; i < locked_count && !collided; i++) {
-                locked_tetromino *lt = &locked[i];
-                int lt_cells[4][2];
-                get_tetromino_cells(lt->shape, lt->rotation, lt_cells);
-
-                for (int ci = 0; ci < 4; ci++) {
-                    float cx = current.pos_x + cur_cells[ci][0] * (float)block_width;
-                    float cy = next_y        + cur_cells[ci][1] * (float)block_height;
-                    for (int lj = 0; lj < 4; lj++) {
-                        float lx = lt->pos_x + lt_cells[lj][0] * (float)block_width;
-                        float ly = lt->pos_y + lt_cells[lj][1] * (float)block_height;
-                        if (cx == lx && cy == ly) {
-                            collided = 1;
-                            break;
-                        }
-                    }
-                    if (collided) break;
-                }
-            }
-
-            // check bottom boundary collision
-            if (next_y + tetro_h > (float)gameh) {
-                collided = 1;
+            for (int ci = 0; ci < 4 && !collided; ci++) {
+                int gx = (int)(current.pos_x / block_width) + cur_cells_fall[ci][0];
+                int gy = (int)(next_y / block_height) + cur_cells_fall[ci][1];
+                if (gy >= vertical_cnt || grid[gy][gx]) collided = 1;
             }
 
             if (collided) {
-                // lock current tetromino
-                if (locked_count < MAX_LOCKED) {
-                    locked[locked_count].rt       = current_rt;
+                // lock current — write 4 cells to grid + locked
+                int cells_lock[4][2];
+                get_tetromino_cells(current.shape, current.rotation, cells_lock);
+                for (int ci = 0; ci < 4; ci++) {
+                    int gx = (int)(current.pos_x / block_width) + cells_lock[ci][0];
+                    int gy = (int)(current.pos_y / block_height) + cells_lock[ci][1];
+                    grid[gy][gx] = 1;
                     locked[locked_count].shape    = current.shape;
-                    locked[locked_count].rotation = current.rotation;
-                    locked[locked_count].pos_x    = current.pos_x;
-                    locked[locked_count].pos_y    = current.pos_y;
+                    locked[locked_count].grid_col = gx;
+                    locked[locked_count].grid_row = gy;
                     locked_count++;
                 }
-                // promote next to current, spawn new next
+
+                // line clear check
+                int lines_cleared = 0;
+                for (int row = 0; row < vertical_cnt; row++) {
+                    int full = 1;
+                    for (int col = 1; col < horizonal_cnt - 1; col++) {
+                        if (!grid[row][col]) { full = 0; break; }
+                    }
+                    if (full) {
+                        lines++;
+                        lines_cleared++;
+                        // remove cells on this row
+                        for (int i = locked_count - 1; i >= 0; i--) {
+                            if (locked[i].grid_row == row) {
+                                locked[i] = locked[locked_count - 1];
+                                locked_count--;
+                            }
+                        }
+                        // shift all rows above down by one
+                        for (int r = row; r > 0; r--) {
+                            for (int c = 0; c < horizonal_cnt; c++) {
+                                grid[r][c] = grid[r - 1][c];
+                            }
+                        }
+                        for (int c = 0; c < horizonal_cnt; c++) grid[0][c] = 0;
+                        // update locked cells: cells above the cleared row move down
+                        for (int i = 0; i < locked_count; i++) {
+                            if (locked[i].grid_row < row) locked[i].grid_row++;
+                        }
+                        row--; // re-check same index (shifted row moved here)
+                    }
+                }
+
+                // add score based on lines cleared
+                switch (lines_cleared) {
+                    case 1: score += 40;   break;
+                    case 2: score += 100;  break;
+                    case 3: score += 300;  break;
+                    case 4: score += 1200; break;
+                    default: break;
+                }
+
+                // promote next to current
                 current.shape = next_shape;
                 current.pos_x = (float)(4 * block_width);
                 current.pos_y = 0.0f;
                 current.fall_timer = 0.0f;
                 current.rotation = 0;
+                UnloadRenderTexture(current_rt);
                 current_rt = rebuild_tetromino_rt(current.shape, 0);
                 UnloadRenderTexture(next_rt);
                 next_rt = gen_next_block_texture(&next_shape);
@@ -221,27 +226,25 @@ int main(void)
         BeginDrawing();
         ClearBackground(background_color);
         {
-            // walls & scoreboard
             Rectangle src = { 0, 0, (float)walls_and_scoreboard.texture.width, -(float)walls_and_scoreboard.texture.height };
             Rectangle dst = { 0, 0, walls_and_scoreboard.texture.width * game_scale, walls_and_scoreboard.texture.height * game_scale };
             DrawTexturePro(walls_and_scoreboard.texture, src, dst, (Vector2){0, 0}, 0.0f, WHITE);
         }
-        {
-            // render all locked tetrominos
-            for (int i = 0; i < locked_count; i++) {
-                locked_tetromino *lt = &locked[i];
-                Rectangle src = { 0, 0, (float)lt->rt.texture.width, -(float)lt->rt.texture.height };
-                Rectangle dst = {
-                    lt->pos_x * game_scale,
-                    lt->pos_y * game_scale,
-                    lt->rt.texture.width * game_scale,
-                    lt->rt.texture.height * game_scale
-                };
-                DrawTexturePro(lt->rt.texture, src, dst, (Vector2){0, 0}, 0.0f, WHITE);
-            }
+        // render locked cells (block_tex is a regular Texture2D — no Y-flip)
+        for (int i = 0; i < locked_count; i++) {
+            locked_cell *lc = &locked[i];
+            float lx = (float)(lc->grid_col * block_width);
+            float ly = (float)(lc->grid_row * block_height);
+            Rectangle dst = {
+                lx * game_scale,
+                ly * game_scale,
+                block_tex[lc->shape].width * game_scale,
+                block_tex[lc->shape].height * game_scale
+            };
+            DrawTextureEx(block_tex[lc->shape], (Vector2){lx * game_scale, ly * game_scale}, 0.0f, game_scale, WHITE);
         }
+        // render current falling tetromino
         {
-            // render current falling tetromino
             Rectangle src = { 0, 0, (float)current_rt.texture.width, -(float)current_rt.texture.height };
             Rectangle dst = {
                 current.pos_x * game_scale,
@@ -251,8 +254,8 @@ int main(void)
             };
             DrawTexturePro(current_rt.texture, src, dst, (Vector2){0, 0}, 0.0f, WHITE);
         }
+        // render preview
         {
-            // render preview (next) tetromino on scoreboard
             Rectangle src = { 0, 0, (float)next_rt.texture.width, -(float)next_rt.texture.height };
             Rectangle dst = {
                 preview_x * game_scale,
@@ -262,15 +265,53 @@ int main(void)
             };
             DrawTexturePro(next_rt.texture, src, dst, (Vector2){0, 0}, 0.0f, WHITE);
         }
+        // draw lines, score, and level
+        // text color should be #404243  
+        // score
+        DrawTextEx(
+            fnt, 
+            TextFormat("%u", score), 
+            (Vector2){
+                game_scale * (64.0 / 440.0 * scoreboard_width + gamew), 
+                game_scale * (175.0 / 1152 * gameh)
+            }, 
+            text_pt, 
+            0.1f, 
+            text_color
+        );
+        // level
+        DrawTextEx(
+            fnt, 
+            TextFormat("%u", 1), 
+            (Vector2){
+                game_scale * (64.0 / 440.0 * scoreboard_width + gamew), 
+                game_scale * (437.0 / 1152 * gameh)
+            }, 
+            text_pt, 
+            0.1f, 
+            text_color
+        );
+        // lines
+        DrawTextEx(
+            fnt, 
+            TextFormat("%u", lines), 
+            (Vector2){
+                game_scale * (64.0 / 440.0 * scoreboard_width + gamew), 
+                game_scale * (620.0 / 1152 * gameh)
+            }, 
+            text_pt, 
+            0.1f, 
+            text_color
+        );
+        
         EndDrawing();
     }
 
     #pragma region cleanup
     UnloadRenderTexture(current_rt);
+    UnloadFont(fnt);
     UnloadRenderTexture(next_rt);
-    for (int i = 0; i < locked_count; i++) {
-        UnloadRenderTexture(locked[i].rt);
-    }
+    for (int i = 0; i < 7; i++) UnloadTexture(block_tex[i]);
     UnloadRenderTexture(walls_and_scoreboard);
     UnloadMusicStream(bgm);
     CloseAudioDevice();
