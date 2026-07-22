@@ -4,6 +4,7 @@
 #include <renderer.h>
 #include <definitions.h>
 #include <tetromino.h>
+#include <cg.h>
 
 #define MAX_LOCKED (vertical_cnt * horizonal_cnt)
 static unsigned int lines = 0;
@@ -54,6 +55,9 @@ int main(void)
     float preview_x = (float)(gamew + 0.28f * scoreboard_width);
     float preview_y = (float)(gameh - 0.55f * scoreboard_width);
     Font fnt = LoadFont("assets/font.ttf");
+
+    show_tittle_screen_cg("assets/title_screen.png", "assets/title_screen.mp3", fnt);
+
     while (!WindowShouldClose())
     {
         // ── INPUT ──────────────────────────────────
