@@ -16,10 +16,10 @@ jobs:
       # 配置 CMake
       - name: Configure CMake
         run: |
-          cmake -B build 
-            -DCMAKE_C_COMPILER=cl 
-            -DCMAKE_CXX_COMPILER=cl
-            -DEMBED_ASSETS=ON
+          cmake -B build `
+            -DCMAKE_C_COMPILER=cl `
+            -DCMAKE_CXX_COMPILER=cl `
+            -DEMBED_ASSETS=ON `
 
       # 编译
       - name: Build
