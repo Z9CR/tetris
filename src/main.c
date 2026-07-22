@@ -26,10 +26,19 @@ int main(void)
     SetTargetFPS(game_fps);
     InitAudioDevice();
 
+#ifdef EMBED_ASSETS
+    #include "assets_embedded.h"
+    Font fnt = LoadFontFromMemory(".ttf", emb_font_ttf, emb_font_ttf_len, (int)(text_pt), NULL, 0);
+#else
     Font fnt = LoadFont("assets/font.ttf");
+#endif
     Texture2D block_tex[7];
     for (int i = 0; i < 7; i++) {
+#ifdef EMBED_ASSETS
+        Image img = LoadImageFromMemory(".png", emb_block_png_data[i], emb_block_png_len[i]);
+#else
         Image img = LoadImage(TextFormat("assets/blocks/%d.png", i));
+#endif
         block_tex[i] = LoadTextureFromImage(img);
         UnloadImage(img);
     }
@@ -44,7 +53,11 @@ int main(void)
         locked_cell locked[MAX_LOCKED];
         int locked_count = 0;
 
+#ifdef EMBED_ASSETS
+        const Music bgm = LoadMusicStreamFromMemory(".mp3", emb_theme_mp3, emb_theme_mp3_len);
+#else
         const Music bgm = LoadMusicStream("assets/theme.mp3");
+#endif
         RenderTexture2D walls_and_scoreboard = wall_and_board_renderer("assets/wall.png", "assets/score_board.png");
 
         active_tetromino current;

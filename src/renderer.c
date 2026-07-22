@@ -7,10 +7,22 @@
 /// @param wall_img_path path to wall image
 /// @param scoreboard_img_path path to scboard image
 /// @return the rendered wall texture
+#ifdef EMBED_ASSETS
+    #include "assets_embedded.h"
+#endif
+
 RenderTexture2D wall_and_board_renderer(const char* wall_img_path, const char* scoreboard_img_path) {
+#ifdef EMBED_ASSETS
+    Image _wall = LoadImageFromMemory(".png", emb_wall_img, emb_wall_img_len);
+#else
     Image _wall = LoadImage(wall_img_path);
+#endif
     Texture2D wall = LoadTextureFromImage(_wall);
+#ifdef EMBED_ASSETS
+    Image _scboard = LoadImageFromMemory(".png", emb_scboard_img, emb_scboard_img_len);
+#else
     Image _scboard = LoadImage(scoreboard_img_path);
+#endif
     Texture2D scboard = LoadTextureFromImage(_scboard);
     RenderTexture2D wall_and_scboard_render = LoadRenderTexture(gamew + scoreboard_width, gameh);
     BeginTextureMode(wall_and_scboard_render);
@@ -40,7 +52,11 @@ RenderTexture2D gen_next_block_texture(tetromino_shapes* out_shape)
     int w = get_tetromino_width(next_code, 0);
     int h = get_tetromino_height(next_code, 0);
     RenderTexture2D next_shape = LoadRenderTexture(w, h);
+#ifdef EMBED_ASSETS
+    Image _block = LoadImageFromMemory(".png", emb_block_png_data[next_code], emb_block_png_len[next_code]);
+#else
     Image _block = LoadImage(TextFormat("assets/blocks/%d.png", next_code));
+#endif
     Texture2D block = LoadTextureFromImage(_block);
     draw_tetromino_code(next_code, 0, &next_shape, &block);
     #pragma region cleanup
@@ -56,7 +72,11 @@ RenderTexture2D rebuild_tetromino_rt(tetromino_shapes shape, int rotation)
     int h = get_tetromino_height(shape, rotation);
 
     RenderTexture2D rt = LoadRenderTexture(w, h);
+#ifdef EMBED_ASSETS
+    Image _block = LoadImageFromMemory(".png", emb_block_png_data[shape], emb_block_png_len[shape]);
+#else
     Image _block = LoadImage(TextFormat("assets/blocks/%d.png", shape));
+#endif
     Texture2D block = LoadTextureFromImage(_block);
     draw_tetromino_code(shape, rotation, &rt, &block);
     #pragma region cleanup

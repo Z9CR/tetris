@@ -3,7 +3,12 @@ trap [System.Management.Automation.PipelineStoppedException] {
     Remove-Item .\tetris.exe
     Remove-Item .\tetris.pdb
 }
-cmake -B build 
+param([switch]$EmbedAssets)
+if ($EmbedAssets) {
+    cmake -B build -DEMBED_ASSETS=ON
+} else {
+    cmake -B build
+}
 cmake --build build
 Copy-Item .\build\Debug\tetris.exe .\ 
 Copy-Item .\build\Debug\tetris.pdb .\ 
