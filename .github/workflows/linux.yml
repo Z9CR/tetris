@@ -1,4 +1,4 @@
-name: Build Wayland Version
+name: Build Linux (X11 for XWayland)
 
 on:
   push:
@@ -7,22 +7,21 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build-wayland:
+  build-linux:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      # 安装 Wayland 及其依赖库（编译时必需）
-      - name: Install Wayland dependencies
+      - name: Install X11 dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libwayland-dev \
-            libxkbcommon-dev \
-            libgl1-mesa-dev \
-            libdrm-dev \
-            libgbm-dev
+            libx11-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxcursor-dev \
+            libxi-dev
 
       # 配置 CMake
       - name: Configure CMake
@@ -31,15 +30,15 @@ jobs:
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_CXX_COMPILER=g++ \
             -DCMAKE_BUILD_TYPE=Release \
-            -DEMBED_ASSETS=ON \
+            -DEMBED_ASSETS=ON
 
       # 编译
       - name: Build
         run: cmake --build build --config Release
 
-      # 上传构建产物作为 artifact
+      # 上传产物
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tetris-wayland
-          path: build/tetris
+          name: tetris-linux-gcc
+          path: build/tetris   
