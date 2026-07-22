@@ -21,7 +21,8 @@ jobs:
             libxrandr-dev \
             libxinerama-dev \
             libxcursor-dev \
-            libxi-dev
+            libxi-dev \
+            libgl1-mesa-dev \
 
       # 配置 CMake
       - name: Configure CMake
