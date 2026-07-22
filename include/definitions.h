@@ -21,4 +21,16 @@
 #define winw (game_scale * (gamew + scoreboard_width))
 #define winh (gameh * game_scale)
 #define wintitle "Tetris"
+
+#ifdef _WIN32
+    __declspec(dllimport) void __stdcall Sleep(unsigned long ms);
+    #define sleep_ms(ms) Sleep((unsigned long)(ms))
+#else
+    #include <time.h>
+    #define sleep_ms(ms) do { \
+        struct timespec ts = { (ms) / 1000, ((ms) % 1000) * 1000000L }; \
+        nanosleep(&ts, NULL); \
+    } while(0)
+#endif
+
 #endif

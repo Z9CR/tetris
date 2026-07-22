@@ -1,8 +1,10 @@
 #include <raylib.h>
 #include <cg.h>
+#include <time.h>
 #include <definitions.h>
 
-void show_tittle_screen_cg(const char* pic_path, const char* music_path, Font fnt) {
+
+void show_tittle_screen_cg(const char* pic_path, const char* music_path,const Font fnt) {
     Music bgm = LoadMusicStream(music_path);
     Image _pic = LoadImage(pic_path);
     Texture2D pic = LoadTextureFromImage(_pic);
@@ -34,3 +36,5 @@ void show_tittle_screen_cg(const char* pic_path, const char* music_path, Font fn
     UnloadImage(_pic);
     UnloadMusicStream(bgm);
 }
+
+
