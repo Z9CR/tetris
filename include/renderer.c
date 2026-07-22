@@ -34,34 +34,34 @@ RenderTexture2D wall_and_board_renderer(const char* wall_img_path, const char* s
 
 RenderTexture2D gen_next_block_texture(tetromino_shapes* out_shape)
 {
-    // gen random block shape
     const tetromino_shapes next_code = rand() % 7;
     if (out_shape != NULL) *out_shape = next_code;
-    tetromino next_prop;
-    next_prop.texture_path = TextFormat("assets/blocks/%d.png", next_code);
-    switch (next_code)
-    {
-    case I:
-        next_prop.width = 4 * block_width;
-        next_prop.height = block_height;
-        break;
-    case O:
-        next_prop.width = 2 * block_width;
-        next_prop.height = 2 * block_height;
-        break;
-    default:
-        next_prop.width = 3 * block_width;
-        next_prop.height = 2 * block_height;
-        break;
-    };
-    // draw the tetromino
-    RenderTexture2D next_shape = LoadRenderTexture(next_prop.width, next_prop.height);
-    Image _block = LoadImage(next_prop.texture_path);
+
+    int w = get_tetromino_width(next_code, 0);
+    int h = get_tetromino_height(next_code, 0);
+    RenderTexture2D next_shape = LoadRenderTexture(w, h);
+    Image _block = LoadImage(TextFormat("assets/blocks/%d.png", next_code));
     Texture2D block = LoadTextureFromImage(_block);
-    draw_tetromino_code(next_code, &next_shape, &block);
+    draw_tetromino_code(next_code, 0, &next_shape, &block);
     #pragma region cleanup
     UnloadTexture(block);
     UnloadImage(_block);
     #pragma endregion
     return next_shape;
+}
+
+RenderTexture2D rebuild_tetromino_rt(tetromino_shapes shape, int rotation)
+{
+    int w = get_tetromino_width(shape, rotation);
+    int h = get_tetromino_height(shape, rotation);
+
+    RenderTexture2D rt = LoadRenderTexture(w, h);
+    Image _block = LoadImage(TextFormat("assets/blocks/%d.png", shape));
+    Texture2D block = LoadTextureFromImage(_block);
+    draw_tetromino_code(shape, rotation, &rt, &block);
+    #pragma region cleanup
+    UnloadTexture(block);
+    UnloadImage(_block);
+    #pragma endregion
+    return rt;
 }
