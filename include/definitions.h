@@ -9,13 +9,13 @@
 #define background_color (Color){0xC6, 0xCF, 0xA1, 0xFF}
 
 #define game_fps 60
-#define tetromino_falling_speed 1 // ? blocks per second
+#define tetromino_falling_speed 2 // ? blocks per second
 #define gamew (horizonal_cnt * block_width)
 #define gameh (vertical_cnt * block_width)
-#define scale 0.5
+#define game_scale 0.5f
 // divide by 2 because the original game frame is too big, 
 // the physical screen cant display all
 #define winw ((gamew + scoreboard_width) / 2)
-#define winh (gameh * scale)
+#define winh (gameh * game_scale)
 #define wintitle "Tetris"
 #endif

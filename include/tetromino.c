@@ -51,3 +51,19 @@ void draw_tetromino_code(tetromino_shapes code, RenderTexture2D* Render, Texture
     };
     EndTextureMode();
 }
+
+int get_tetromino_height(tetromino_shapes shape) {
+    switch (shape) {
+        case I: return block_height;         // 1 block tall
+        case O: return 2 * block_height;     // 2 blocks tall
+        default: return 2 * block_height;    // J, L, S, T, Z
+    }
+}
+
+int get_tetromino_width(tetromino_shapes shape) {
+    switch (shape) {
+        case I: return 4 * block_width;      // 4 blocks wide
+        case O: return 2 * block_width;      // 2 blocks wide
+        default: return 3 * block_width;     // J, L, S, T, Z
+    }
+}

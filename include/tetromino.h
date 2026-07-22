@@ -18,6 +18,13 @@ typedef enum tetromino_shapes {
            //  ##   Z
 } tetromino_shapes;
 
+typedef struct active_tetromino {
+    tetromino_shapes shape;
+    float pos_x;
+    float pos_y;
+    float fall_timer;
+} active_tetromino;
+
 typedef struct tetromino {
     int width;
     int height;
@@ -29,5 +36,11 @@ typedef struct tetromino {
 /// @param Render: Render to contain tetrominos
 /// @param block: randomized texture of tetrominos' block
 void draw_tetromino_code(tetromino_shapes code, RenderTexture2D* Render, Texture2D* block);
+
+/// @brief get tetromino pixel-height based on shape
+int get_tetromino_height(tetromino_shapes shape);
+
+/// @brief get tetromino pixel-width based on shape
+int get_tetromino_width(tetromino_shapes shape);
 
 #endif

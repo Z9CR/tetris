@@ -1,6 +1,6 @@
-#include <definitions.h>
-#include <tetromino.h>
+#include <stdlib.h>
 #include <renderer.h>
+#include <definitions.h>
 
 
 /// @brief render the wall texture and return it
@@ -32,10 +32,11 @@ RenderTexture2D wall_and_board_renderer(const char* wall_img_path, const char* s
 }
 
 
-RenderTexture2D gen_next_block_texture(void)
+RenderTexture2D gen_next_block_texture(tetromino_shapes* out_shape)
 {
     // gen random block shape
     const tetromino_shapes next_code = rand() % 7;
+    if (out_shape != NULL) *out_shape = next_code;
     tetromino next_prop;
     next_prop.texture_path = TextFormat("assets/blocks/%d.png", next_code);
     switch (next_code)
