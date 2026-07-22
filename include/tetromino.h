@@ -1,5 +1,6 @@
 #ifndef TETROMINO
 #define TETROMINO
+#include <raylib.h>
 
 typedef enum tetromino_shapes {
     I = 0, // ####  I
