@@ -25,6 +25,7 @@ typedef struct active_tetromino {
     float pos_x;
     float pos_y;
     float fall_timer;
+    float translate_timer;
 } active_tetromino;
 
 typedef struct locked_tetromino {

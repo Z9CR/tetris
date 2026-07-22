@@ -32,22 +32,30 @@ int main(void)
     locked_tetromino locked[MAX_LOCKED];
     int locked_count = 0;
 
-    // init current tetromino
+    // init current & preview tetromino
     active_tetromino current;
     current.pos_x = (float)(4 * block_width);
     current.pos_y = 0.0f;
     current.fall_timer = 0.0f;
+    current.translate_timer = (float)tetromino_translating_delay;
     current.rotation = 0;
     RenderTexture2D current_rt = gen_next_block_texture(&current.shape);
+
+    // preview tetromino
+    tetromino_shapes next_shape;
+    RenderTexture2D next_rt = gen_next_block_texture(&next_shape);
+    float preview_x = (float)(gamew + 0.28f * scoreboard_width);
+    float preview_y = (float)(gameh - 0.55f * scoreboard_width);
 
     while (!WindowShouldClose())
     {
         // ── INPUT ──────────────────────────────────
+        current.translate_timer += GetFrameTime();
         int cur_cells[4][2];
         get_tetromino_cells(current.shape, current.rotation, cur_cells);
 
         // A: try move left
-        if (IsKeyPressed(KEY_A) || (IsKeyDown(KEY_A) && current.fall_timer > 0.1f)) {
+        if (IsKeyDown(KEY_A) && current.translate_timer >= (float)tetromino_translating_delay) {
             float new_x = clamp_within_walls(current.pos_x - (float)block_width,
                                              current.shape, current.rotation);
             int blocked = 0;
@@ -64,10 +72,10 @@ int main(void)
                     }
                 }
             }
-            if (!blocked) current.pos_x = new_x;
+            if (!blocked) { current.pos_x = new_x; current.translate_timer = 0.0f; }
         }
         // D: try move right
-        if (IsKeyPressed(KEY_D) || (IsKeyDown(KEY_D) && current.fall_timer > 0.1f)) {
+        if (IsKeyDown(KEY_D) && current.translate_timer >= (float)tetromino_translating_delay) {
             float new_x = clamp_within_walls(current.pos_x + (float)block_width,
                                              current.shape, current.rotation);
             int blocked = 0;
@@ -84,7 +92,7 @@ int main(void)
                     }
                 }
             }
-            if (!blocked) current.pos_x = new_x;
+            if (!blocked) { current.pos_x = new_x; current.translate_timer = 0.0f; }
         }
         // Z: rotate CCW
         if (IsKeyPressed(KEY_Z)) {
@@ -193,12 +201,15 @@ int main(void)
                     locked[locked_count].pos_y    = current.pos_y;
                     locked_count++;
                 }
-                // spawn new tetromino
+                // promote next to current, spawn new next
+                current.shape = next_shape;
                 current.pos_x = (float)(4 * block_width);
                 current.pos_y = 0.0f;
                 current.fall_timer = 0.0f;
                 current.rotation = 0;
-                current_rt = gen_next_block_texture(&current.shape);
+                current_rt = rebuild_tetromino_rt(current.shape, 0);
+                UnloadRenderTexture(next_rt);
+                next_rt = gen_next_block_texture(&next_shape);
             } else {
                 current.pos_y = next_y;
                 current.fall_timer -= fall_interval;
@@ -240,11 +251,23 @@ int main(void)
             };
             DrawTexturePro(current_rt.texture, src, dst, (Vector2){0, 0}, 0.0f, WHITE);
         }
+        {
+            // render preview (next) tetromino on scoreboard
+            Rectangle src = { 0, 0, (float)next_rt.texture.width, -(float)next_rt.texture.height };
+            Rectangle dst = {
+                preview_x * game_scale,
+                preview_y * game_scale,
+                next_rt.texture.width * game_scale,
+                next_rt.texture.height * game_scale
+            };
+            DrawTexturePro(next_rt.texture, src, dst, (Vector2){0, 0}, 0.0f, WHITE);
+        }
         EndDrawing();
     }
 
     #pragma region cleanup
     UnloadRenderTexture(current_rt);
+    UnloadRenderTexture(next_rt);
     for (int i = 0; i < locked_count; i++) {
         UnloadRenderTexture(locked[i].rt);
     }
