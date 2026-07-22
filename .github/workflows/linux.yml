@@ -31,7 +31,6 @@ jobs:
             -DCMAKE_C_COMPILER=gcc \
             -DCMAKE_CXX_COMPILER=g++ \
             -DCMAKE_BUILD_TYPE=Release \
-            -DUSE_WAYLAND=ON
 
       # 编译
       - name: Build
@@ -42,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tetris-wayland
-          path: build/tetris   # 根据你的项目名称调整
+          path: build/tetris
