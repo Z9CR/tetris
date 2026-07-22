@@ -1,0 +1,33 @@
+name: Build Windows (MSVC)
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 配置 CMake
+      - name: Configure CMake
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_C_COMPILER=cl `
+            -DCMAKE_CXX_COMPILER=cl
+
+      # 编译
+      - name: Build
+        run: cmake --build build --config Release
+
+      # 上传编译产物
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tetris-windows-msvc
+          path: build/Release/tetris.exe
